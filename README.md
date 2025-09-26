@@ -85,5 +85,4 @@ systemctl enable --now lxc-config-export.timer
 ```
 
 Check it ```systemctl status lxc-config-export.timer```
-Run it now ```systemctl start lxc-config-export.service```
-```journalctl -u lxc-config-export.service```
+Run it now ```systemctl start lxc-config-export.service``` and ```journalctl -u lxc-config-export.service```
