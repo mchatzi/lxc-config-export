@@ -9,6 +9,10 @@ You can export single files or whole directories.
 Usage:  
 ```export-lxc.sh <backup-dir> [yaml-file]```
 
+Schedules can be made via cron/systemd.
+If no conf file is provided, conf.yml is searched in same dir as the sh file.
+
+
 ## Examples
 A yaml with some common LXCs you may be running:
 ```

@@ -1,0 +1,25 @@
+backups:
+
+  - lxc: 131
+    path: /opt/dashy/user-data
+
+  - lxc: 131
+    path: /opt/dashy/public/item-icons
+
+  - lxc: 132
+    path: /opt/homepage/config
+
+  - lxc: 199
+    path: /opt/mirrorr/data
+
+  - path: /etc/samba
+  - path: /root/lxc-config-mirrorr
+
+  - lxc: 103
+    path: /etc/pihole/dnsmasq.conf
+
+  - lxc: 103
+    path: /etc/pihole/hosts
+
+  - lxc: 103
+    path: /etc/pihole/pihole.toml
