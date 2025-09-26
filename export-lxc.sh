@@ -36,7 +36,7 @@ for entry in data.get('backups', []):
     path = entry.get('path')
     if path:
         print(f"{lxc}|{path}")
-EOF 
+EOF
 )
 
 if [[ ${#BACKUP_ENTRIES[@]} -eq 0 ]]; then
@@ -50,7 +50,7 @@ for entry in "${BACKUP_ENTRIES[@]}"; do
 
     DEST_NAME="$([[ -z "$LXC_ID" ]] && echo "local" || echo "$LXC_ID")"
     DEST_DIR="$BACKUP_DIR/$DEST_NAME"
-    if [[ ! -d "$DEST_DIR" ]]; then``
+    if [[ ! -d "$DEST_DIR" ]]; then
         mkdir "$DEST_DIR"
     fi
 
