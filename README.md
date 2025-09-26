@@ -9,6 +9,12 @@ You can export single files or whole directories.
 Usage:  
 ```export-lxc.sh <backup-dir> [yaml-file]```
 
+```./export-lxc.sh /media/bak/minix/lxc/config-backups```
+
+
+
+
+
 Schedules can be made via cron/systemd.
 If no conf file is provided, conf.yml is searched in same dir as the sh file.
 
@@ -27,8 +33,11 @@ backups:
   - lxc: 132
     path: /opt/homepage/config
 
-  - path: /etc/samba
-  - path: /root/lxc-config-mirrorr
+  - lxc: 199
+    path: /opt/mirrorr/data
+
+  - path: /etc/samba  #Paths in Proxmox host
+  - path: /root/lxc-config-export   #The config of this tool :)
 
   - lxc: 103
     path: /etc/pihole/dnsmasq.conf
@@ -40,3 +49,41 @@ backups:
     path: /etc/pihole/pihole.toml
 ```
 
+
+
+## Example systemd service
+
+### lxc-config-export.service
+```
+[Unit]
+Description=Run export-lxc
+
+[Service]
+Type=oneshot
+ExecStart=bash -c "./export-lxc.sh /media/bak/minix/lxc/config-backups"
+WorkingDirectory=/root/lxc-config-export
+```
+
+### lxc-config-export.timer
+```
+[Unit]
+Description=Schedule export-lxc
+
+[Timer]
+OnCalendar=Fri *-*-* 19:16:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+```
+
+Then:
+```
+systemctl daemon-reexec
+systemctl daemon-reload
+systemctl enable --now lxc-config-export.timer
+```
+
+Check it ```systemctl status lxc-config-export.timer```
+Run it now ```systemctl start lxc-config-export.service```
+```journalctl -u lxc-config-export.service```
