@@ -9,7 +9,7 @@ You can export single files or whole directories.
 Usage:  
 ```export-lxc.sh <backup-dir> [yaml-file]```
 
-```./export-lxc.sh /media/bak/minix/lxc/config-backups```
+```./export-lxc.sh /media/bak/minix/lxc-config-backups```
 
 
 
@@ -60,7 +60,7 @@ Description=Run export-lxc
 
 [Service]
 Type=oneshot
-ExecStart=bash -c "./export-lxc.sh /media/bak/minix/lxc/config-backups"
+ExecStart=bash -c "./export-lxc.sh /media/bak/minix/lxc-config-backups"
 WorkingDirectory=/root/lxc-config-export
 ```
 
