@@ -45,6 +45,7 @@ if [[ ${#BACKUP_ENTRIES[@]} -eq 0 ]]; then
 fi
 
 # --- 2. Perform backups ---
+set +e
 for entry in "${BACKUP_ENTRIES[@]}"; do
     IFS="|" read -r LXC_ID PATH_VAL <<< "$entry"
 
@@ -61,10 +62,14 @@ for entry in "${BACKUP_ENTRIES[@]}"; do
         tar czf - "$PATH_VAL" | tar xzf - -C "$DEST_DIR" --no-same-owner
     else
         # LXC path
+        if ! pct status "$LXC_ID" | grep -q "status: running"; then
+            echo -e "❌ Container $LXC_ID is not running, skipping...\n"
+            continue
+        fi
         pct exec "$LXC_ID" -- tar czf - "$PATH_VAL" | tar xzf - -C "$DEST_DIR" --no-same-owner
     fi
 
-    echo "Backup completed for $([[ -z "$LXC_ID" ]] && echo "local path" || echo "LXC $LXC_ID")"
+    echo -e "✅ Backup completed for $([[ -z "$LXC_ID" ]] && echo "local path" || echo "LXC $LXC_ID")\n\n"
 done
 
-echo "All backups done."
+echo "LXC configs export finished"
