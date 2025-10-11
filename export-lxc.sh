@@ -69,7 +69,7 @@ for entry in "${BACKUP_ENTRIES[@]}"; do
         pct exec "$LXC_ID" -- tar czf - "$PATH_VAL" | tar xzf - -C "$DEST_DIR" --no-same-owner
     fi
 
-    echo -e "✅ Backup completed for $([[ -z "$LXC_ID" ]] && echo "local path" || echo "LXC $LXC_ID")\n\n"
+    echo -e "✅ Backup completed for $([[ -z "$LXC_ID" ]] && echo "local path" || echo "LXC $LXC_ID")\n"
 done
 
 echo "LXC configs export finished"
