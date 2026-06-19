@@ -27,17 +27,25 @@ fi
 
 # --- 1. Read YAML using Python ---
 # Output format: lxc_id|path (lxc_id empty for local paths)
-readarray -t BACKUP_ENTRIES < <(python3 - <<EOF
-import yaml
-with open("$YAML_FILE") as f:
-    data = yaml.safe_load(f)
+if ! readarray -t BACKUP_ENTRIES < <(python3 - <<EOF
+import sys,yaml
+try:
+    with open("$YAML_FILE") as f:
+        data = yaml.safe_load(f)
+except Exception as e:
+    print(f"YAML error: {e}", file=sys.stderr)
+    sys.exit(1)
+
 for entry in data.get('backups', []):
     lxc = str(entry.get('lxc', ''))
     path = entry.get('path')
     if path:
         print(f"{lxc}|{path}")
 EOF
-)
+); then
+    echo "Failed to parse $YAML_FILE"
+    exit 1
+fi
 
 if [[ ${#BACKUP_ENTRIES[@]} -eq 0 ]]; then
     echo "No backup entries found in $YAML_FILE"
