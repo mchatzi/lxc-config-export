@@ -1,17 +1,14 @@
 #!/bin/bash
 # export-lxc.sh
-# Usage: ./export-lxc.sh <backup-dir> [yaml-conf-file]
+# Usage: ./export-lxc.sh <backup-dir> <uptimeKumaPushURL> [yaml-conf-file]
 
 set -euo pipefail
 
 # --- 1. Arguments & defaults ---
 SCRIPT_DIR=$(dirname "$0")
 BACKUP_DIR=${1:-""}
-YAML_FILE=${2:-"$SCRIPT_DIR/conf.yml"}
-
-#YOU NEED ONE PER PROXMOX HOST
-UPTIMEKUMA_PUSH_URL="http://uptimekuma-mnx.home:3001/api/push/USxWhT3CZk"
-
+UPTIMEKUMA_PUSH_URL=${2:-""}
+YAML_FILE=${3:-"$SCRIPT_DIR/conf.yml"}
 
 fatal() {
     local msg="$1"
@@ -43,6 +40,10 @@ fi
 
 if [[ ! -w "$BACKUP_DIR" ]]; then
     fatal "Backup directory is not writable."
+fi
+
+if [[ -z "$UPTIMEKUMA_PUSH_URL" ]]; then
+    fatal "Uptime Kuma URL must be provided as second argument."
 fi
 
 # --- 1. Read YAML using Python ---
@@ -90,10 +91,24 @@ for entry in "${BACKUP_ENTRIES[@]}"; do
     else
         # LXC path
         if ! pct status "$LXC_ID" | grep -q "status: running"; then
-            echo -e "❌ Container $LXC_ID is not running, skipping...\n"
-            continue
+            echo -e "❌ Container $LXC_ID is not running, mounting its filesystem...\n"
+            # Do not mount by default, this should be a configuration flag (the lxc may be huge to mount?)
+
+            unmount_lxc() {
+                pct unmount "$LXC_ID" 2>/dev/null
+                echo "Unmounted filesystem"
+            }
+
+            trap unmount_lxc EXIT INT TERM
+            pct mount "$LXC_ID"
+            tar -C "/var/lib/lxc/$LXC_ID/rootfs" -czf - ".${PATH_VAL}" | tar -xzf - -C "$DEST_DIR" --no-same-owner
+            unmount_lxc
+            trap - EXIT INT TERM # Clear the trap so it doesn't break the next loop item
+        else
+            pct exec "$LXC_ID" -- tar czf - "$PATH_VAL" | tar xzf - -C "$DEST_DIR" --no-same-owner
         fi
-        pct exec "$LXC_ID" -- tar czf - "$PATH_VAL" | tar xzf - -C "$DEST_DIR" --no-same-owner
+
+
     fi
 
     chmod -R u=rwX,g=rX,o=rX "$DEST_DIR"
@@ -103,4 +118,3 @@ done
 
 echo "LXC configs export finished"
 notify_uptimekuma "up" "LXC configs ($(hostname)) export finished"
-
